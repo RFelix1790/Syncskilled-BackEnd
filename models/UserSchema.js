@@ -2,14 +2,41 @@ import { model, Schema } from "mongoose";
 
 const userSchema = new Schema(
   {
-    userName: { type: String, required: true, unique: true, trim: true },
-    email: { type: String, required: true, unique: tru, trim: true },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     password: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
     bio: { type: String, default: "" },
-    location: { type: String, required: true },
+    location: { type: String}, //I removed required for now to enable signup without location
     profilePhoto: { type: String, default: "" },
-    skillsToTeach: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
-    skillsToLearn: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
+    credits: { type: Number, default: 10 },
+
+    skillsToTeach: [
+      {
+        skillId: { type: Schema.Types.ObjectId, ref: "Skill" },
+        creditsPerHour: Number,
+        isActive: { type: Boolean, default: true },
+      },
+    ],
+
+    skillsToLearn: [
+      {
+        skillId: { type: Schema.Types.ObjectId, ref: "Skill" },
+        interestedSince: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
