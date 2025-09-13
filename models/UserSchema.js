@@ -2,10 +2,11 @@ import { model, Schema } from "mongoose";
 
 const userSchema = new Schema(
   {
-    userName: {
+    username: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
       trim: true,
       index: true,
     },
@@ -15,17 +16,35 @@ const userSchema = new Schema(
       unique: true,
       trim: true,
       index: true,
+      lowercase: true,
     },
     password: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
     bio: { type: String, default: "" },
     location: { type: String, index: true },
     profilePhoto: { type: String, default: "" },
-    skillsToTeach: [{ type: Schema.Types.ObjectId, ref: "Skill", index: true }],
-    skillsToLearn: [{ type: Schema.Types.ObjectId, ref: "Skill", index: true }],
+    credits: { type: Number, default: 10 },
+
+    skillsToTeach: [
+      {
+        skillId: { type: Schema.Types.ObjectId, ref: "Skill" },
+        creditsPerHour: Number,
+        isActive: { type: Boolean, default: true },
+        index: true,
+      },
+    ],
+
+    skillsToLearn: [
+      {
+        skillId: { type: Schema.Types.ObjectId, ref: "Skill" },
+        interestedSince: { type: Date, default: Date.now },
+        index: true,
+      },
+    ],
   },
   { timestamps: true }
 );
-userSchema.index({ location: 1, userName: 1 });
+userSchema.index({ location: 1, username: 1 });
 userSchema.index({ skillsToTeach: 1 });
 userSchema.index({ skillsToLearn: 1 });
 const User = model("User", userSchema);
