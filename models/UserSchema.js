@@ -18,7 +18,7 @@ const userSchema = new Schema(
     },
     password: { type: String, required: true },
     bio: { type: String, default: "" },
-    location: { type: String, required: true, index: true },
+    location: { type: String, index: true },
     profilePhoto: { type: String, default: "" },
     skillsToTeach: [{ type: Schema.Types.ObjectId, ref: "Skill", index: true }],
     skillsToLearn: [{ type: Schema.Types.ObjectId, ref: "Skill", index: true }],
