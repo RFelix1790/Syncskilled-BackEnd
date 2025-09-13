@@ -7,4 +7,4 @@ const router = express.Router()
 
 router.get('/', refreshIfNeeded, requireAuth,  meService)
 
-export default router;
+export default router; 

@@ -8,8 +8,8 @@ import authRoutes from "./routes/auth.routes.js";
 import meRoutes from "./routes/me.routes.js";
 import helmetMiddleware from "./middlewares/helmetMiddleware.js";
 
+
 const PORT = process.env.PORT;
-// dotenv.config();
 const app = express();
 
 app.use(morgan("dev"));

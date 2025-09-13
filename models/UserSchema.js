@@ -30,7 +30,6 @@ const userSchema = new Schema(
         skillId: { type: Schema.Types.ObjectId, ref: "Skill" },
         creditsPerHour: Number,
         isActive: { type: Boolean, default: true },
-        index: true,
       },
     ],
 
@@ -38,7 +37,6 @@ const userSchema = new Schema(
       {
         skillId: { type: Schema.Types.ObjectId, ref: "Skill" },
         interestedSince: { type: Date, default: Date.now },
-        index: true,
       },
     ],
   },
