@@ -12,4 +12,4 @@ router.get('/', getMeService)
 router.patch('/', patchMeService);
 router.put('/password', changeMyPasswordService);
 
-export default router;
+export default router; 
