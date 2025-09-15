@@ -6,8 +6,9 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import meRoutes from "./routes/me.routes.js";
+import categoryRoutes from "./routes/categories.routes.js";
+import skillsRoutes from "./routes/skills.routes.js";
 import helmetMiddleware from "./middlewares/helmetMiddleware.js";
-
 
 const PORT = process.env.PORT;
 const app = express();
@@ -31,6 +32,8 @@ app.get("/api/health", async (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/me", meRoutes);
+app.use("/api", categoryRoutes);
+app.use("/api", skillsRoutes);
 
 try {
   connectDB();
