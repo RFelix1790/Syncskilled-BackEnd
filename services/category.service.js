@@ -5,7 +5,7 @@ import Skill from "../models/SkillsSchema.js";
 export async function listCategoriesService(req, res) {
   try {
     const active = req.query.active !== "false";
-    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+    const page = Math.max(parseInt(req.query.page || "1", 10), 1); //for pagination
     const limit = Math.min(
       Math.max(parseInt(req.query.limit || "50", 10), 1),
       100

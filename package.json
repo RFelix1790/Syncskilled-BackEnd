@@ -5,8 +5,8 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node main.js",
+    "dev": "nodemon main.js",
     "seed": "node scripts/seed.js"
   },
   "repository": {
