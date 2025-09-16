@@ -13,7 +13,7 @@ const securityMiddleware = helmet({
     },
   },
   referrerPolicy: { policy: "no-referrer" },
-  frameguard: { action: "deny" },
+  frameGuard: { action: "deny" },
   noSniff: true,
   hidePoweredBy: true,
 });

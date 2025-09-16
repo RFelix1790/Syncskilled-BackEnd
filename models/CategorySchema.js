@@ -1,7 +1,11 @@
 import { model, Schema } from "mongoose";
 
 function slugify(s) {
-  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return String(s)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 const categorySchema = new Schema(
@@ -9,7 +13,7 @@ const categorySchema = new Schema(
     name: {
       type: String,
       required: true,
-      unique: true,        // human-visible unique
+      unique: true, // human-visible unique
       trim: true,
       maxlength: 60,
       index: true,
@@ -17,10 +21,10 @@ const categorySchema = new Schema(
     slug: {
       type: String,
       required: true,
-      unique: true,        // URL/lookup key; prevents case issues
+      unique: true, // URL/lookup key; prevents case issues
       index: true,
     },
-    description: { type: String, default: "", maxlength: 240 },
+    description: { type: String, default: "", maxLength: 240 },
     icon: { type: String, default: "" },
     isActive: { type: Boolean, default: true, index: true },
   },
