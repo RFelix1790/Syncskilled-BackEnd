@@ -30,7 +30,7 @@ const skillsSchema = new Schema(
       required: true, // unique inside a category
     },
 
-    description: { type: String, default: "" },
+    description: { type: String, default: "", maxlength: 240 },
     defaultCreditsPerHour: { type: Number, min: 0, max: 9999, default: 0 },
     isActive: { type: Boolean, default: true, index: true },
 

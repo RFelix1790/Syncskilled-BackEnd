@@ -8,7 +8,11 @@ import connectDB from "../config/db.js";
 async function run() {
   await connectDB();
 
-  // --- 1) Seed Categories ---
+  // --- 1) Reset Collections ---
+  await Category.deleteMany({});
+  await Skill.deleteMany({});
+
+  // --- 2) Seed Categories ---
   const categories = [
     {
       name: "Languages",
@@ -38,21 +42,12 @@ async function run() {
     },
   ];
 
-  // upsert categories by slug (slug is set by pre-validate hook)
-  const catDocs = [];
-  for (const c of categories) {
-    const doc = await Category.findOneAndUpdate(
-      { name: c.name }, // unique by name/slug
-      { $set: { ...c, isActive: true } },
-      { new: true, upsert: true }
-    );
-    catDocs.push(doc);
-  }
+  const catDocs = await Category.insertMany(categories);
 
   // helper: grab a category id by name
   const catId = (name) => catDocs.find((c) => c.name === name)?._id;
 
-  // --- 2) Seed Skills (each tied to a category) ---
+  // --- 3) Seed Skills ---
   const skills = [
     // Languages
     {
@@ -155,17 +150,11 @@ async function run() {
       description: "Doughs & ovens",
       defaultCreditsPerHour: 10,
     },
-  ].filter((s) => s.category); // safeguard if a category failed to insert
+  ].filter((s) => s.category);
 
-  for (const s of skills) {
-    await Skill.findOneAndUpdate(
-      { category: s.category, name: s.name }, // unique per category via (category, slug)
-      { $set: { ...s, isActive: true } },
-      { new: true, upsert: true }
-    );
-  }
+  await Skill.insertMany(skills);
 
-  console.log("✅ Seed complete.");
+  console.log("✅ Seed complete (fresh insert).");
   await mongoose.disconnect();
 }
 

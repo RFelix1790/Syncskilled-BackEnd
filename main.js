@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import meRoutes from "./routes/me.routes.js";
 import categoryRoutes from "./routes/categories.routes.js";
 import skillsRoutes from "./routes/skills.routes.js";
+import postRoutes from "./routes/posts.routes.js";
 import helmetMiddleware from "./middlewares/helmetMiddleware.js";
 
 const PORT = process.env.PORT;
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/me", meRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api", skillsRoutes);
+app.use("/api", postRoutes);
 
 try {
   connectDB();

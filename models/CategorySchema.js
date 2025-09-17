@@ -24,10 +24,11 @@ const categorySchema = new Schema(
       unique: true, // URL/lookup key; prevents case issues
       index: true,
     },
-    description: { type: String, default: "", maxLength: 240 },
+    description: { type: String, default: "", maxlength: 240 },
     icon: { type: String, default: "" },
     isActive: { type: Boolean, default: true, index: true },
   },
+
   { timestamps: true }
 );
 
