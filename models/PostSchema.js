@@ -26,11 +26,13 @@ const PostSchema = new Schema(
     },
     location: { type: String, maxlength: 240 },
     isActive: { type: Boolean, default: true, index: true },
+    comments: { type: Schema.Types.ObjectId, ref: "Comment", index: true },
   },
   { timestamps: true }
 );
 PostSchema.index({ author: 1 });
 PostSchema.index({ skillToTeach: 1, isActive: 1 });
 PostSchema.index({ status: 1 });
+PostSchema.index({ comments: 1 });
 const Post = model("Post", PostSchema);
 export default Post;

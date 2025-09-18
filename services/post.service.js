@@ -1,8 +1,9 @@
 import PostModel from "../models/PostSchema.js";
 import UserModel from "../models/UserSchema.js";
+import CommentModel from "../models/CommentsSchema.js";
 export async function getAllPosts(req, res) {
   try {
-    const posts = await PostModel.find();
+    const posts = await PostModel.find().populate("author", "username email");
     return res.json(posts);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -10,7 +11,10 @@ export async function getAllPosts(req, res) {
 }
 export async function getSinglePost(req, res) {
   try {
-    const singlePost = await PostModel.findById(req.params.id);
+    const singlePost = await PostModel.findById(req.params.id).populate(
+      "author",
+      "username email"
+    );
     if (!singlePost) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -21,9 +25,9 @@ export async function getSinglePost(req, res) {
 }
 export async function getAuthorFromPost(req, res) {
   try {
-    const authorOfPost = await PostModel.findById(req.params.id).select(
-      "author"
-    );
+    const authorOfPost = await PostModel.findById(req.params.id)
+      .select("author")
+      .populate("author", "username email");
     if (!authorOfPost) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -41,7 +45,11 @@ export async function createPost(req, res) {
       { $push: { posts: savedPost._id } },
       { new: true }
     );
-    res.status(201).json({ message: "created post", Post: savedPost });
+    const populatedPost = await savedPost.populate(
+      "author",
+      "username , email"
+    );
+    res.status(201).json({ message: "created post", Post: populatedPost });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -68,12 +76,13 @@ export async function deletePost(req, res) {
     if (!deletedPost) {
       return res.status(404).json({ error: "Post not found" });
     }
+    await CommentModel.deleteMany({ post: req.params.id });
     await UserModel.findByIdAndUpdate(
-      req.body.userId,
+      deletedPost.author,
       { $pull: { posts: req.params.id } },
       { new: true }
     );
-    res.status(200).json({ message: "Post deleted", Post: deletedPost });
+    res.status(200).json({ message: "Post deleted"});
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
