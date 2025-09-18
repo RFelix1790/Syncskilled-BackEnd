@@ -43,7 +43,6 @@ const userSchema = new Schema(
       },
     ],
     posts: [{ type: Schema.Types.ObjectId, ref: "Post", index: true }],
-    comments: [{ type: Schema.Types.ObjectId, ref: "Comment", index: true }],
   },
   { timestamps: true }
 );
@@ -51,6 +50,5 @@ userSchema.index({ location: 1, username: 1 });
 userSchema.index({ skillsToTeach: 1 });
 userSchema.index({ skillsToLearn: 1 });
 userSchema.index({ posts: 1 });
-userSchema.index({ comments: 1 });
 const User = model("User", userSchema);
 export default User;

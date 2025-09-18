@@ -1,56 +1,18 @@
 import commentsModel from "../models/CommentsSchema.js";
 import postModel from "../models/PostSchema.js";
 import userModel from "../models/UserSchema.js";
-export async function getAllComments(req, res) {
-  try {
-    const comments = await commentsModel
-      .find()
-      .populate("author", "username email")
-      .populate("post", "title");
-    res.status(200).json(comments);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-export async function getCommentsByPost(req, res) {
-  try {
-    const comments = await commentsModel
-      .find({ post: req.params.id })
-      .populate("author", "username email");
-    return res.status(200).json(comments);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
 
-export async function getCommentsByUser(req, res) {
-  try {
-    const comments = await commentsModel
-      .find({ author: req.params.id })
-      .populate("post", "title");
-    return res.status(200).json(comments);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
 export async function createComment(req, res) {
   try {
     const createdComment = await new commentsModel(req.body);
     const savedComment = await createdComment.save();
-    await userModel.findByIdAndUpdate(
-      req.body.author,
-      {
-        $push: { comments: savedComment._id },
-      },
-      { new: true }
-    );
     await postModel.findByIdAndUpdate(
       req.body.post,
       { $push: { comments: savedComment._id } },
       { new: true }
     );
     const populatedComment = await savedComment.populate([
-      { path: "author", select: "username email" },
+      { path: "author", select: "username email profilePhoto" },
       { path: "post", select: "title" },
     ]);
     res
@@ -62,13 +24,14 @@ export async function createComment(req, res) {
 }
 export async function updateComment(req, res) {
   try {
-    const updatedComment = await commentsModel
-      .findByIdAndUpdate(req.params.id, req.body, { new: true })
-      .populate("author", "username email")
-      .populate("post", "title");
-    if (!updatedComment) {
+    const commentId = req.params.id;
+    const commentIdExist = await commentsModel.findById(commentId);
+    if (!commentIdExist)
       return res.status(404).json({ error: "comment not found" });
-    }
+    const updatedComment = await commentsModel
+      .findByIdAndUpdate(commentId, req.body, { new: true })
+      .populate("author", "username email profilePhoto")
+      .populate("post", "title");
     res
       .status(200)
       .json({ message: "comment updated", comment: updatedComment });
@@ -78,20 +41,14 @@ export async function updateComment(req, res) {
 }
 export async function deleteComment(req, res) {
   try {
-    const deletedComment = await commentsModel.findByIdAndDelete(req.params.id);
-    if (!deletedComment) {
+    const commentId = req.params.id;
+    const commentIdExist = await commentsModel.findById(commentId);
+    if (!commentIdExist)
       return res.status(404).json({ error: "comment not found" });
-    }
-    await userModel.findByIdAndUpdate(
-      deletedComment.author,
-      {
-        $pull: { comments: req.params.id },
-      },
-      { new: true }
-    );
+    const deletedComment = await commentsModel.findByIdAndDelete(commentId);
     await postModel.findByIdAndUpdate(
       deletedComment.post,
-      { $pull: { comments: req.params.id } },
+      { $pull: { comments: commentId } },
       { new: true }
     );
     res

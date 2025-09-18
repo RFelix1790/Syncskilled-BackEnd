@@ -1,4 +1,4 @@
-import { Schema, model, startSession } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const PostSchema = new Schema(
   {
@@ -26,7 +26,7 @@ const PostSchema = new Schema(
     },
     location: { type: String, maxlength: 240 },
     isActive: { type: Boolean, default: true, index: true },
-    comments: { type: Schema.Types.ObjectId, ref: "Comment", index: true },
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment", index: true }],
   },
   { timestamps: true }
 );
