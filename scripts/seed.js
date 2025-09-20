@@ -1,81 +1,78 @@
-// scripts/seed.js
-import 'dotenv/config';
-import mongoose from 'mongoose';
-import Category from '../models/CategorySchema.js';
-import Skill from '../models/SkillsSchema.js';
-import connectDB  from '../config/db.js';
+// scripts/seed-skills.js
+import "dotenv/config.js";
+import mongoose from "mongoose";
+import connectDB  from "../config/db.js";
+import Category from "../models/CategorySchema.js";
+import Skill from "../models/SkillsSchema.js";
+
+const seedData = {
+  Languages: [
+    { name: "Spanish Conversation", defaultCreditsPerHour: 8 },
+    { name: "French Grammar", defaultCreditsPerHour: 10 },
+    { name: "English Writing", defaultCreditsPerHour: 12 },
+  ],
+  Music: [
+    { name: "Guitar Basics", defaultCreditsPerHour: 12 },
+    { name: "Piano Theory", defaultCreditsPerHour: 15 },
+    { name: "Singing Lessons", defaultCreditsPerHour: 10 },
+  ],
+  Programming: [
+    { name: "JavaScript Fundamentals", defaultCreditsPerHour: 20 },
+    { name: "React Development", defaultCreditsPerHour: 25 },
+    { name: "Python Basics", defaultCreditsPerHour: 18 },
+  ],
+  "Arts & Crafts": [
+    { name: "Watercolor Painting", defaultCreditsPerHour: 10 },
+    { name: "Digital Photography", defaultCreditsPerHour: 15 },
+  ],
+  Fitness: [
+    { name: "Yoga for Beginners", defaultCreditsPerHour: 8 },
+    { name: "Weight Training", defaultCreditsPerHour: 12 },
+  ],
+  Cooking: [
+    { name: "Italian Cuisine", defaultCreditsPerHour: 14 },
+    { name: "Baking Fundamentals", defaultCreditsPerHour: 10 },
+  ],
+};
 
 async function run() {
   await connectDB();
 
-  // --- 1) Seed Categories ---
-  const categories = [
-    { name: 'Languages',    description: 'Learn to speak new languages', icon: 'languages' },
-    { name: 'Music',        description: 'Instruments, vocals, theory',  icon: 'music' },
-    { name: 'Programming',  description: 'Coding and software skills',    icon: 'code' },
-    { name: 'Arts & Crafts',description: 'Creative and artistic skills',  icon: 'arts' },
-    { name: 'Fitness',      description: 'Training and wellness',         icon: 'fitness' },
-    { name: 'Cooking',      description: 'Culinary skills & recipes',     icon: 'cooking' },
-  ];
+  for (const [catName, skills] of Object.entries(seedData)) {
+    // 1) Ensure category exists
+    let category = await Category.findOne({ name: catName });
+    if (!category) {
+      category = await Category.create({ name: catName, isActive: true });
+      console.log(`✅ Created category: ${catName}`);
+    }
 
-  // upsert categories by slug (slug is set by pre-validate hook)
-  const catDocs = [];
-  for (const c of categories) {
-    const doc = await Category.findOneAndUpdate(
-      { name: c.name },         // unique by name/slug
-      { $set: { ...c, isActive: true } },
-      { new: true, upsert: true }
-    );
-    catDocs.push(doc);
+    // 2) Upsert skills in this category
+    for (const s of skills) {
+      const updated = await Skill.findOneAndUpdate(
+        { category: category._id, name: s.name }, // match by category+name
+        {
+          $set: {
+            description: s.description || "",
+            defaultCreditsPerHour: s.defaultCreditsPerHour,
+            isActive: true,
+          },
+        },
+        {
+          upsert: true,             // create if not exist
+          new: true,                // return the updated/new doc
+          runValidators: true,      // ensure schema rules apply
+        }
+      );
+      console.log(`⚡ Upserted skill: ${updated.name} (slug: ${updated.slug})`);
+    }
   }
 
-  // helper: grab a category id by name
-  const catId = (name) => catDocs.find(c => c.name === name)?._id;
-
-  // --- 2) Seed Skills (each tied to a category) ---
-  const skills = [
-    // Languages
-    { category: catId('Languages'),   name: 'Spanish Conversation', description: 'Practical speaking practice', defaultCreditsPerHour: 8 },
-    { category: catId('Languages'),   name: 'French Grammar',       description: 'Foundations & usage',         defaultCreditsPerHour: 10 },
-    { category: catId('Languages'),   name: 'English Writing',      description: 'Essays & clarity',            defaultCreditsPerHour: 12 },
-
-    // Music
-    { category: catId('Music'),       name: 'Guitar Basics',        description: 'Chords, strumming, rhythm',   defaultCreditsPerHour: 12 },
-    { category: catId('Music'),       name: 'Piano Theory',         description: 'Scales, harmony, reading',    defaultCreditsPerHour: 15 },
-    { category: catId('Music'),       name: 'Singing Lessons',      description: 'Breath & pitch control',      defaultCreditsPerHour: 10 },
-
-    // Programming
-    { category: catId('Programming'), name: 'JavaScript Fundamentals', description: 'Syntax, DOM, async',       defaultCreditsPerHour: 20 },
-    { category: catId('Programming'), name: 'React Development',       description: 'Components & hooks',       defaultCreditsPerHour: 25 },
-    { category: catId('Programming'), name: 'Python Basics',           description: 'Scripts & data types',     defaultCreditsPerHour: 18 },
-
-    // Arts & Crafts
-    { category: catId('Arts & Crafts'), name: 'Watercolor Painting', description: 'Brushwork & color',          defaultCreditsPerHour: 10 },
-    { category: catId('Arts & Crafts'), name: 'Digital Photography', description: 'Composition & editing',      defaultCreditsPerHour: 15 },
-
-    // Fitness
-    { category: catId('Fitness'),     name: 'Yoga for Beginners',   description: 'Mobility & breath',           defaultCreditsPerHour: 8 },
-    { category: catId('Fitness'),     name: 'Weight Training',      description: 'Form & programming',          defaultCreditsPerHour: 12 },
-
-    // Cooking
-    { category: catId('Cooking'),     name: 'Italian Cuisine',      description: 'Pasta & sauces',              defaultCreditsPerHour: 14 },
-    { category: catId('Cooking'),     name: 'Baking Fundamentals',  description: 'Doughs & ovens',              defaultCreditsPerHour: 10 },
-  ].filter(s => s.category); // safeguard if a category failed to insert
-
-  for (const s of skills) {
-    await Skill.findOneAndUpdate(
-      { category: s.category, name: s.name }, // unique per category via (category, slug)
-      { $set: { ...s, isActive: true } },
-      { new: true, upsert: true }
-    );
-  }
-
-  console.log('✅ Seed complete.');
   await mongoose.disconnect();
+  console.log("🎉 Skill seeding complete.");
 }
 
 run().catch(async (e) => {
-  console.error('❌ Seed failed:', e);
+  console.error("❌ Seed failed:", e);
   await mongoose.disconnect();
   process.exit(1);
 });

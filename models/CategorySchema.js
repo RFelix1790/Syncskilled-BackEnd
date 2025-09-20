@@ -1,8 +1,5 @@
 import { model, Schema } from "mongoose";
-
-function slugify(s) {
-  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
+import { slugify } from "../utils/slugify.js";
 
 const categorySchema = new Schema(
   {

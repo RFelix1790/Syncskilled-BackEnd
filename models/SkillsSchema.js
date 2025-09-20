@@ -1,57 +1,60 @@
 // models/SkillsSchema.js
 import { model, Schema } from "mongoose";
-
-function slugify(s) {
-  return String(s)
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { slugify } from "../utils/slugify.js";
 
 const skillsSchema = new Schema(
   {
-    // REL: each skill belongs to exactly one Category
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
-      index: true,
-    },
-
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 80,
-    },
-    slug: {
-      type: String,
-      required: true, // unique inside a category
-    },
-
+    category: { type: Schema.Types.ObjectId, ref: "Category", required: true, index: true },
+    name: { type: String, required: true, trim: true, maxlength: 80 },
+    slug: { type: String, index: true, required: true },
     description: { type: String, default: "" },
     defaultCreditsPerHour: { type: Number, min: 0, max: 9999, default: 0 },
     isActive: { type: Boolean, default: true, index: true },
-
-    // optional tags for search later
     tags: { type: [String], default: [] },
   },
   { timestamps: true }
 );
 
-// keep slug synced with name
+// Ensure slug exists on create/save
 skillsSchema.pre("validate", function (next) {
-  if (this.isModified("name")) {
+  if (!this.slug || this.isModified("name")) {
     this.slug = slugify(this.name);
   }
   next();
 });
 
-// Uniqueness: no duplicate skill names within the same category
-skillsSchema.index({ category: 1, slug: 1 }, { unique: true });
+// Ensure slug is set for findOneAndUpdate / upserts too
+skillsSchema.pre("findOneAndUpdate", function (next) {
+  const update = this.getUpdate() || {};
+  const filter = this.getFilter() || {};
 
-// Common query paths
+  // get name from update first, else from $set, else from filter (match)
+  const name =
+    update.name ??
+    (update.$set && update.$set.name) ??
+    filter.name;
+
+  // if caller already sets slug explicitly, don't override
+  const slugIsBeingSet =
+    update.slug !== undefined ||
+    (update.$set && update.$set.slug !== undefined);
+
+  if (name && !slugIsBeingSet) {
+    const newSlug = slugify(name);
+    if (update.$set) update.$set.slug = newSlug;
+    else update.slug = newSlug;
+    this.setUpdate(update);
+  }
+
+  next();
+});
+
+// Unique per category
+skillsSchema.index(
+  { category: 1, slug: 1 },
+  { unique: true, partialFilterExpression: { slug: { $exists: true, $ne: "" } } }
+);
+
 skillsSchema.index({ category: 1, isActive: 1 });
 skillsSchema.index({ name: 1 });
 skillsSchema.index({ tags: 1 });

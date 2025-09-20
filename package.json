@@ -5,9 +5,10 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "seed": "node scripts/seed.js"
+    "start": "node main.js",
+    "dev": "nodemon main.js",
+    "seed": "node scripts/seed.js",
+    "backfill-skill-slugs" : " node scripts/backfill-skill-slugs.js"
   },
   "repository": {
     "type": "git",
