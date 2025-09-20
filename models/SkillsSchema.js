@@ -4,10 +4,26 @@ import { slugify } from "../utils/slugify.js";
 
 const skillsSchema = new Schema(
   {
-    category: { type: Schema.Types.ObjectId, ref: "Category", required: true, index: true },
-    name: { type: String, required: true, trim: true, maxlength: 80 },
-    slug: { type: String, index: true, required: true },
-    description: { type: String, default: "" },
+    // REL: each skill belongs to exactly one Category
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+      index: true,
+    },
+
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 80,
+    },
+    slug: {
+      type: String,
+      required: true, // unique inside a category
+    },
+
+    description: { type: String, default: "", maxlength: 240 },
     defaultCreditsPerHour: { type: Number, min: 0, max: 9999, default: 0 },
     isActive: { type: Boolean, default: true, index: true },
     tags: { type: [String], default: [] },

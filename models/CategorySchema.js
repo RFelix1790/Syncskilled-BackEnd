@@ -6,7 +6,7 @@ const categorySchema = new Schema(
     name: {
       type: String,
       required: true,
-      unique: true,        // human-visible unique
+      unique: true, // human-visible unique
       trim: true,
       maxlength: 60,
       index: true,
@@ -14,13 +14,14 @@ const categorySchema = new Schema(
     slug: {
       type: String,
       required: true,
-      unique: true,        // URL/lookup key; prevents case issues
+      unique: true, // URL/lookup key; prevents case issues
       index: true,
     },
     description: { type: String, default: "", maxlength: 240 },
     icon: { type: String, default: "" },
     isActive: { type: Boolean, default: true, index: true },
   },
+
   { timestamps: true }
 );
 
