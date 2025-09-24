@@ -29,6 +29,7 @@ export async function requireAuth(req, res, next) {
  * NOTE: keep this lightweight; don't silently swallow refresh failures.
  */
 export async function refreshIfNeeded(req, res, next) {
+   if (req.path.startsWith("/api/auth")) return next(); // never refresh on auth routes
   const access = req.signedCookies?.access_token;
   const refresh = req.signedCookies?.refresh_token;
   if (!refresh) return next();

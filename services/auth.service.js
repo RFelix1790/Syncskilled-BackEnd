@@ -101,16 +101,6 @@ export async function loginService(req, res) {
   }
 }
 
-export async function logoutService(req, res) {
-  try {
-    clearAuthCookies(res);
-    return res.json({ ok: true });
-  } catch (error) {
-    console.error("Logout failed", error);
-    return res.status(500).json({ error: "Server error" });
-  }
-}
-
 export function refreshService(req, res) {
   try {
     const refreshToken = req.signedCookies?.refresh_token;
@@ -140,3 +130,14 @@ export function refreshService(req, res) {
     return res.status(401).json({ error: "Invalid refresh token" });
   }
 }
+
+export async function logoutService(req, res) {
+  try {
+    clearAuthCookies(res);
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Logout failed", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
