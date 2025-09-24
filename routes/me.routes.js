@@ -20,7 +20,7 @@ router.use(refreshIfNeeded, requireAuth);
 
 router.get("/", getMeService);
 router.patch("/", patchMeService);
-router.put("/password", changeMyPasswordService);
+router.put("/change-password", changeMyPasswordService);
 
 router.post("/teach", addTeachSkillService);
 router.delete("/teach/:id", removeTeachSkillService); 

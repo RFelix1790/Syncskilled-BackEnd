@@ -3,33 +3,64 @@ import { comparePassword, hashPassword } from "../utils/security.js";
 
 // GET /api/me
 export async function getMeService(req, res) {
-  return res.json({ user: req.user });
+   try {
+    const user = await User.findById(req.user._id)
+      .select("-password") // never send hashed password
+      .populate({
+        path: "skillsToTeach.skillId",
+        select: "name slug category",
+        populate: { path: "category", select: "name slug" },
+      })
+      .populate({
+        path: "skillsToLearn.skillId",
+        select: "name slug category",
+        populate: { path: "category", select: "name slug" },
+      })
+      .lean();
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    return res.json({ user });
+  } catch (error) {
+    console.error("getMeService error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
 }
 
 // PATCH /api/me
 export async function patchMeService(req, res) {
   try {
-    const { name, bio, location, profilePhoto, username, email } = req.body || {};
+    const { name, bio, location, profilePhoto, username, email } =
+      req.body || {};
     const updates = {};
 
     // Whitelist + light validation
     if (typeof name === "string" && name.trim()) updates.name = name.trim();
     if (typeof bio === "string") updates.bio = bio.slice(0, 200);
     if (typeof location === "string") updates.location = location.slice(0, 80);
-    if (typeof profilePhoto === "string") updates.profilePhoto = profilePhoto.trim();
+    if (typeof profilePhoto === "string")
+      updates.profilePhoto = profilePhoto.trim();
 
     // Optional: username/email (uniqueness checks)
     if (typeof username === "string" && username.trim()) {
       const uname = username.toLowerCase().trim();
-      const isTaken = await User.findOne({ username: uname, _id: { $ne: req.user._id } });
-      if (isTaken) return res.status(409).json({ error: "Username already taken" });
+      const isTaken = await User.findOne({
+        username: uname,
+        _id: { $ne: req.user._id },
+      });
+      if (isTaken)
+        return res.status(409).json({ error: "Username already taken" });
       updates.username = uname;
     }
 
     if (typeof email === "string" && email.trim()) {
       const mail = email.toLowerCase().trim();
-      const isTaken = await User.findOne({ email: mail, _id: { $ne: req.user._id } });
-      if (isTaken) return res.status(409).json({ error: "Email already in use" });
+      const isTaken = await User.findOne({
+        email: mail,
+        _id: { $ne: req.user._id },
+      });
+      if (isTaken)
+        return res.status(409).json({ error: "Email already in use" });
       updates.email = mail;
     }
 
@@ -68,7 +99,10 @@ export async function changeMyPasswordService(req, res) {
     const user = await User.findById(req.user._id).select("+password");
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const isOldPasswordMatched = await comparePassword(oldPassword, user.password);
+    const isOldPasswordMatched = await comparePassword(
+      oldPassword,
+      user.password
+    );
     if (!isOldPasswordMatched) {
       return res.status(401).json({ error: "Old password is incorrect" });
     }

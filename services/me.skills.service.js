@@ -9,17 +9,23 @@ export async function addTeachSkillService(req, res) {
     const idOrSlug = req.body.skill ?? req.body.skillId;
     if (!idOrSlug) return res.status(400).json({ error: "Missing skill" });
 
-    const skill = await resolveByIdOrSlug(Skill, idOrSlug, { select: "_id name isActive" });
+    const skill = await resolveByIdOrSlug(Skill, idOrSlug, { select: "_id name isActive defaultCreditsPerHour" });
     if (!skill) return res.status(404).json({ error: "Skill not found" });
     if (skill.isActive === false) return res.status(400).json({ error: "Skill is not active" });
 
-    const creditsPerHour = req.body.creditsPerHour;
-    if (creditsPerHour !== undefined) {
-      const n = Number(creditsPerHour);
-      if (!Number.isFinite(n) || n < 0 || n > 9999) {
-        return res.status(400).json({ error: "creditsPerHour must be between 0 and 9999" });
-      }
-    }
+let creditsPerHour;
+if (req.body.creditsPerHour !== undefined) {
+  const n = Number(req.body.creditsPerHour);
+  if (!Number.isFinite(n) || n < 0 || n > 9999) {
+    return res
+      .status(400)
+      .json({ error: "creditsPerHour must be between 0 and 9999" });
+  }
+  creditsPerHour = n;
+} else {
+  // fallback: use skill’s defaultCreditsPerHour or 0
+  creditsPerHour = skill.defaultCreditsPerHour;
+}
 
     const exists = await User.findOne({
       _id: req.user._id,
