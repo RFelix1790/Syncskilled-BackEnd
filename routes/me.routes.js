@@ -11,7 +11,7 @@ import {
 import {
   addTeachSkillService,
   removeTeachSkillService,
-   addLearnSkillService,   
+  addLearnSkillService,
   removeLearnSkillService,
 } from "../services/me.skills.service.js";
 
@@ -20,11 +20,10 @@ router.use(refreshIfNeeded, requireAuth);
 
 router.get("/", getMeService);
 router.patch("/", patchMeService);
-router.put("/password", changeMyPasswordService);
+router.put("/change-password", changeMyPasswordService);
 
 router.post("/teach", addTeachSkillService);
-router.delete("/teach/:id", removeTeachSkillService); 
+router.delete("/teach/:id", removeTeachSkillService);
 router.post("/learn", addLearnSkillService);
-router.delete("/learn/:id", removeLearnSkillService); 
-
+router.delete("/learn/:id", removeLearnSkillService);
 export default router;
