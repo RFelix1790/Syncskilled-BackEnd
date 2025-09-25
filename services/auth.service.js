@@ -17,14 +17,11 @@ export async function registerService(req, res) {
     }
 
     const existing = await User.findOne({
-      $or: [
-        { email: email.toLowerCase() },
-        { username: username.toLowerCase() },
-      ],
+      $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }],
     });
-
-    if (existing)
+    if (existing) {
       return res.status(409).json({ error: "Email or username already taken" });
+    }
 
     const hashedPassword = await hashPassword(password);
     const user = await User.create({
@@ -52,11 +49,12 @@ export async function registerService(req, res) {
         username: user.username,
       },
     });
-  } catch (error) {
-    console.error("Failed to create a user", error);
-    return res.status(500).json({ error: "Server error", error });
+  } catch (err) {
+    console.error("Failed to create a user", err);
+    return res.status(500).json({ error: "Server error" });
   }
 }
+
 
 export async function loginService(req, res) {
   try {
