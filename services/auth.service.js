@@ -101,6 +101,36 @@ export async function loginService(req, res) {
   }
 }
 
+export function refreshService(req, res) {
+  try {
+    const refreshToken = req.signedCookies?.refresh_token;
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Missing refresh token" });
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+
+    // Mint a fresh access token.
+    const newAccess = signAccessToken({
+      sub: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      username: payload.username,
+    });
+
+    // Option A (simple): keep the same refresh cookie until it naturally expires
+    // Option B (rotation): also mint a new refresh token here and set it.
+    // For now we'll keep refresh as-is to honor "15 min of inactivity".
+    setAuthCookies(res, newAccess, refreshToken);
+
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    // On invalid/expired refresh, clear cookies and 401 the client.
+    clearAuthCookies(res);
+    return res.status(401).json({ error: "Invalid refresh token" });
+  }
+}
+
 export async function logoutService(req, res) {
   try {
     clearAuthCookies(res);
@@ -111,19 +141,3 @@ export async function logoutService(req, res) {
   }
 }
 
-export function refreshService(req, res) {
-  try {
-    const refreshToken = req.signedCookies?.refresh_token;
-    if (!refreshToken) return res.status(401).json({ error: "Missing refresh token" });
-
-    const user = verifyRefreshToken(refreshToken);
-    const newAccessToken = signAccessToken({
-      sub: user.sub,
-      email: user.email,
-      name: user.name,
-      username: user.username,
-    });
-    setAuthCookies(res, newAccessToken, refreshToken)
-    return res.status(200).json({ok: true})
-  } catch (error) {}
-}

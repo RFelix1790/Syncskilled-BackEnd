@@ -24,7 +24,7 @@ const skillsSchema = new Schema(
     },
 
     description: { type: String, default: "", maxlength: 240 },
-    defaultCreditsPerHour: { type: Number, min: 0, max: 9999, default: 0 },
+    defaultCreditsPerHour: { type: Number,required: true, min: 0, max: 9999, default: 10 },
     isActive: { type: Boolean, default: true, index: true },
     tags: { type: [String], default: [] },
   },
@@ -72,6 +72,7 @@ skillsSchema.index(
 );
 
 skillsSchema.index({ category: 1, isActive: 1 });
+skillsSchema.index({ slug: 1 });
 skillsSchema.index({ name: 1 });
 skillsSchema.index({ tags: 1 });
 
