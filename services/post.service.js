@@ -3,10 +3,10 @@ import UserModel from "../models/UserSchema.js";
 import CommentModel from "../models/CommentsSchema.js";
 export async function getAllPosts(req, res) {
   try {
-    const posts = await PostModel.find().populate(
-      "author",
-      "username email  profilePhoto -_id"
-    );
+    const posts = await PostModel.find()
+      .populate("author", "username email  profilePhoto -_id")
+      .populate("skillToLearn", "name -_id")
+      .populate("skillToTeach", "name -_id");
     return res.json(posts);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -20,7 +20,9 @@ export async function getSinglePost(req, res) {
         path: "comments",
         select: "like unlike comment -_id",
         populate: { path: "author", select: "username profilePhoto -_id" },
-      });
+      })
+      .populate("skillToLearn", "name -_id")
+      .populate("skillToTeach", "name -_id");
     if (!singlePost) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -44,10 +46,11 @@ export async function getAuthorFromPost(req, res) {
 }
 export async function createPost(req, res) {
   try {
-    const newPost = new PostModel(req.body);
+    const postData = { ...req.body, comments: [], author: req.user._id };
+    const newPost = new PostModel(postData);
     const savedPost = await newPost.save();
     await UserModel.findByIdAndUpdate(
-      req.body.userId,
+      req.user._id,
       { $push: { posts: savedPost._id } },
       { new: true }
     );

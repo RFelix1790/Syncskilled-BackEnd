@@ -12,8 +12,8 @@ import {
 router.get("/posts", getAllPosts);
 router.get("/posts/:id", getSinglePost);
 router.get("/posts/author/:id", getAuthorFromPost);
-router.post("/create_post", createPost);
-router.put("/update_post/:id", updatePost);
-router.delete("/delete_post/:id", deletePost);
-router.get("/comments/post/:id", getCommentsByPost);
+router.get("/comments/posts/:id", getCommentsByPost);
+router.post("/posts", createPost);
+router.put("/posts/:id", updatePost);
+router.delete("/posts/:id", deletePost);
 export default router;
