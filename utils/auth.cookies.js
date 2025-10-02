@@ -27,11 +27,11 @@ export function setAuthCookies(res, accessToken, refreshToken) {
 // robust clearer: clear with the same options, and also try the other path just in case
 export function clearAuthCookies(res) {
   // primary
-  res.clearCookie("access_token",  { ...accessCookieOptions,  maxAge: 10 });
-  res.clearCookie("refresh_token", { ...refreshCookieOptions, maxAge: 15 });
+  res.clearCookie("access_token",  { ...accessCookieOptions,  maxAge: 0 });
+  res.clearCookie("refresh_token", { ...refreshCookieOptions, maxAge: 0 });
 
   // fallback clears in case cookie was set with a different path previously
-  res.clearCookie("access_token",  { ...accessCookieOptions,  path: "/",        maxAge: 10 });
-  res.clearCookie("refresh_token", { ...refreshCookieOptions, path: "/",        maxAge: 15 });
-  res.clearCookie("refresh_token", { ...refreshCookieOptions, path: "/api/auth",maxAge: 15 });
+  res.clearCookie("access_token",  { ...accessCookieOptions,  path: "/",        maxAge: 0 });
+  res.clearCookie("refresh_token", { ...refreshCookieOptions, path: "/",        maxAge: 0});
+  res.clearCookie("refresh_token", { ...refreshCookieOptions, path: "/api/auth",maxAge: 0 });
 }
