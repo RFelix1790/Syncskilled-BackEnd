@@ -4,7 +4,7 @@ const isProd = process.env.NODE_ENV === "production";
 export const accessCookieOptions = {
   httpOnly: true,
   signed: true,
-  sameSite: "lax",
+  sameSite: isProd ? "none" : "lax",
   secure: isProd,
   path: "/",                 // access for whole API
   maxAge: 10 * 60 * 1000,    // 10 minutes
@@ -13,7 +13,7 @@ export const accessCookieOptions = {
 export const refreshCookieOptions = {
   httpOnly: true,
   signed: true,
-  sameSite: "lax",
+  sameSite: isProd ? "none" : "lax",
   secure: isProd,
   path: "/api/auth",         // IMPORTANT: must match your auth routes
   maxAge: 15 * 60 * 1000,    // 15 minutes
